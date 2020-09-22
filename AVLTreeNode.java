@@ -38,13 +38,13 @@ public class AVLTreeNode<T extends Comparable<T>> {
 	public void print(int depth) {
 		if (right != null) {
 			right.print(depth + 2);
-			System.out.println(" ".repeat(depth + 1) + "/");
+//			System.out.println(" ".repeat(depth + 1) + "/");
 		}
 
-		System.out.println(" ".repeat(depth) + element);
+//		System.out.println(" ".repeat(depth) + element);
 
 		if (left != null) {
-			System.out.println(" ".repeat(depth + 1) + "\\");
+//			System.out.println(" ".repeat(depth + 1) + "\\");
 			left.print(depth + 2);
 		}
 	}
@@ -55,7 +55,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 	 * @param n - AVLTreeNode for which to calculate the height.
 	 */
 	private void calculateHeight(AVLTreeNode<T> n) {
-		System.out.println("HÃ¤r adderar vi 1 pÃ¥ " + n.element + "s hÃ¶jd");
 		n.height = 1 + Math.max(nodeHeight(n.left), nodeHeight(n.right));
 	}
 
@@ -71,8 +70,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		if (data.compareTo(element) < 0) {
 // the key we insert is smaller than the current node
 			if (left == null) {
-				if (this.right == null)
-					calculateHeight(this);
 				left = new AVLTreeNode<>(data);
 			} else {
 				left = left.insert(data);
@@ -80,8 +77,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		} else if (element.compareTo(data) < 0) {
 // the key we insert is greater than the current node
 			if (right == null) {
-				if (this.left == null)
-					calculateHeight(this);
 				right = new AVLTreeNode<>(data);
 			} else {
 				right = right.insert(data);
@@ -89,6 +84,39 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		} else {
 			throw new AVLTreeException("Element already exists.");
 		}
+		// Anropa calculateHeight på this för att kolla så att höjden stämmer efter vi kanske har ändrat runt i trädet.
+		// Eftersom att den kommer börja längst ner i trädet så funkar metoden.
+		calculateHeight(this);
+		
+		// Balance är för att kolla så att höjden är -1, 0 eller 1. Annars är det obalans någonstans i trädet.
+		int balance = nodeHeight(left) - nodeHeight(right);
+		System.out.println(element + "'s balance is " + balance);
+		
+		// Om det är obalans behöver vi göra en av fyra rotationer. I varje if-sats kollar vi om balansen är större än 1 eller mindre än -1
+		// Den första vi kollar är doubleRotationWithRightChild. Här behöver vi veta om nyckeln vi stoppar in är större eller mindre än högerbarnets element.
+		if (balance < -1 && data.compareTo(right.element) < 0) {
+			System.out.println("double rotation with right child");
+			return doubleRotationWithRightChild(this);
+		}
+		
+		// Samma princip för doubleRotationWithLeftChild
+		if (balance > 1 && data.compareTo(left.element) > 0) {
+			System.out.println("double rotation with left child");
+			return doubleRotationWithLeftChild(this);
+		}
+
+		// Om balansen är större än 1 och vi inte gjorde en doubleRotationWithRightChild innebär det att det måste vara en enkel rotation vi ska göra.
+		if (balance > 1) {
+			System.out.println("single rotation with left child");
+			return singleRotationWithLeftChild(this);
+		}
+		
+		// Samma princip som för singleRotationWithLeftChild
+		if (balance < -1) {
+			System.out.println("single rotation with right child");
+			return singleRotationWithRightChild(this);
+		}
+
 		return this;
 	}
 
@@ -208,6 +236,32 @@ public class AVLTreeNode<T extends Comparable<T>> {
 					return left;
 				}
 			}
+		}
+		// Anropa calculateHeight på this för att kolla så att höjden stämmer efter vi kanske har ändrat runt i trädet.
+		// Eftersom att den kommer börja längst ner i trädet så funkar metoden.
+		calculateHeight(this);
+		
+		// Precis som med insert vill vi veta nodens balans. Alltså deklarerar vi int balance här.
+		int balance = nodeHeight(left) - nodeHeight(right);
+
+		// Först kollar vi om balansen är större än 2. Om den är det 
+		if (balance > 1 && left.nodeHeight(left) - left.nodeHeight(right) < 0) {
+			System.out.println("double rotation with left child");
+			return doubleRotationWithLeftChild(this);
+		}
+
+		if (balance < -1 && right.nodeHeight(left) - right.nodeHeight(right) > 0) {
+			System.out.println("double rotation with right child");
+			return doubleRotationWithRightChild(this);
+		}
+
+		if (balance > 1) {
+			System.out.println("single rotation with left child");
+			return singleRotationWithLeftChild(this);
+		}
+		if (balance < -1) {
+			System.out.println("single rotation with right child");
+			return singleRotationWithRightChild(this);
 		}
 		return this;
 	}
