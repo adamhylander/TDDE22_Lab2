@@ -38,13 +38,13 @@ public class AVLTreeNode<T extends Comparable<T>> {
 	public void print(int depth) {
 		if (right != null) {
 			right.print(depth + 2);
-			System.out.println(" ".repeat(depth + 1) + "/");
+//			System.out.println(" ".repeat(depth + 1) + "/");
 		}
 
-		System.out.println(" ".repeat(depth) + element);
+//		System.out.println(" ".repeat(depth) + element);
 
 		if (left != null) {
-			System.out.println(" ".repeat(depth + 1) + "\\");
+//			System.out.println(" ".repeat(depth + 1) + "\\");
 			left.print(depth + 2);
 		}
 	}
@@ -55,7 +55,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 	 * @param n - AVLTreeNode for which to calculate the height.
 	 */
 	private void calculateHeight(AVLTreeNode<T> n) {
-		System.out.println("Här adderar vi 1 på " + n.element + "s höjd");
 		n.height = 1 + Math.max(nodeHeight(n.left), nodeHeight(n.right));
 	}
 
@@ -71,8 +70,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		if (data.compareTo(element) < 0) {
 // the key we insert is smaller than the current node
 			if (left == null) {
-				if (this.right == null)
-					calculateHeight(this);
 				left = new AVLTreeNode<>(data);
 			} else {
 				left = left.insert(data);
@@ -80,8 +77,6 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		} else if (element.compareTo(data) < 0) {
 // the key we insert is greater than the current node
 			if (right == null) {
-				if (this.left == null)
-					calculateHeight(this);
 				right = new AVLTreeNode<>(data);
 			} else {
 				right = right.insert(data);
@@ -89,6 +84,29 @@ public class AVLTreeNode<T extends Comparable<T>> {
 		} else {
 			throw new AVLTreeException("Element already exists.");
 		}
+		
+		calculateHeight(this);
+		int balance = nodeHeight(left) - nodeHeight(right);
+		System.out.println(element + "'s balance is " + balance);
+		if (balance > 1 && data.compareTo(left.element) > 0) {
+			System.out.println("double rotation with left child");
+			return doubleRotationWithLeftChild(this);
+		}
+
+		if (balance < -1 && data.compareTo(right.element) < 0) {
+			System.out.println("double rotation with right child");
+			return doubleRotationWithRightChild(this);
+		}
+
+		if (balance > 1 && data.compareTo(element) < 0) {
+			System.out.println("single rotation with left child");
+			return singleRotationWithLeftChild(this);
+		}
+		if (balance < -1 && data.compareTo(element) > 0) {
+			System.out.println("single rotation with right child");
+			return singleRotationWithRightChild(this);
+		}
+
 		return this;
 	}
 
@@ -208,6 +226,35 @@ public class AVLTreeNode<T extends Comparable<T>> {
 					return left;
 				}
 			}
+		}
+		calculateHeight(this);
+		int balance = nodeHeight(left) - nodeHeight(right);
+		int balanceLeft = 0;
+		int balanceRight = 0;
+		if(left != null)
+		balanceLeft = left.nodeHeight(left) - left.nodeHeight(right);
+		if (right != null)
+		balanceRight = right.nodeHeight(left) - right.nodeHeight(right);
+		System.out.println(element + "'s balance is " + balance);
+		System.out.println(key);
+		System.out.println(key.compareTo(element));
+		if (balance > 1 && balanceLeft < 0) {
+			System.out.println("double rotation with left child");
+			return doubleRotationWithLeftChild(this);
+		}
+
+		if (balance < -1 && balanceRight < 0) {
+			System.out.println("double rotation with right child");
+			return doubleRotationWithRightChild(this);
+		}
+
+		if (balance > 1 && balanceLeft >= 0) {
+			System.out.println("single rotation with left child");
+			return singleRotationWithLeftChild(this);
+		}
+		if (balance < -1 && balanceRight <= 0) {
+			System.out.println("single rotation with right child");
+			return singleRotationWithRightChild(this);
 		}
 		return this;
 	}
